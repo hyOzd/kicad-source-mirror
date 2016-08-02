@@ -96,11 +96,10 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
             }
             else
             {
+                VECTOR2D anchor = m_view->ToWorld( VECTOR2D( aEvent.GetX(), aEvent.GetY() ) );
                 double zoomScale = pow( 2., d.y / DRAG_ZOOM_FACTOR );
 
-                m_view->SetScale( m_dragZoomStartScale * zoomScale );
-
-                wxLogDebug("d.y: %f, zoomScale: %f", d.y, zoomScale);
+                m_view->SetScale( m_dragZoomStartScale * zoomScale, anchor );
             }
 
             aEvent.StopPropagation();
