@@ -80,12 +80,25 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
 
     if( !isAutoPanning && aEvent.Dragging() )
     {
-        if( m_state == DRAG_PANNING )
+        if( m_state == DRAG_PANNING || m_state == DRAG_ZOOMING )
         {
             VECTOR2D   d = m_dragStartPoint - VECTOR2D( aEvent.GetX(), aEvent.GetY() );
             VECTOR2D   delta = m_view->ToWorld( d, false );
 
-            m_view->SetCenter( m_lookStartPoint + delta );
+            if ( m_state == DRAG_PANNING )
+            {
+                m_view->SetCenter( m_lookStartPoint + delta );
+            }
+            else
+            {
+                double zoomScale = 1. + d.y / 10.;
+
+                m_view->SetScale( m_dragZoomStartScale * zoomScale );
+
+                wxLogDebug("d.y: %f, zoomScale: %f", d.y, zoomScale);
+            }
+
+
             aEvent.StopPropagation();
         }
     }
@@ -202,7 +215,16 @@ void WX_VIEW_CONTROLS::onButton( wxMouseEvent& aEvent )
         {
             m_dragStartPoint = VECTOR2D( aEvent.GetX(), aEvent.GetY() );
             m_lookStartPoint = m_view->GetCenter();
-            m_state = DRAG_PANNING;
+
+            if ( aEvent.ControlDown() )
+            {
+                m_state = DRAG_ZOOMING;
+                m_dragZoomStartScale = m_view->GetScale();
+            }
+            else
+            {
+                m_state = DRAG_PANNING;
+            }
         }
 
         if( aEvent.LeftUp() )
@@ -214,6 +236,11 @@ void WX_VIEW_CONTROLS::onButton( wxMouseEvent& aEvent )
         if( aEvent.MiddleUp() )
             m_state = IDLE;
 
+        break;
+
+    case DRAG_ZOOMING:
+        if (aEvent.MiddleUp() || !aEvent.ControlDown())
+            m_state = IDLE;
         break;
     }
 
@@ -307,6 +334,7 @@ void WX_VIEW_CONTROLS::onTimer( wxTimerEvent& aEvent )
 
     case IDLE:    // Just remove unnecessary warnings
     case DRAG_PANNING:
+    case DRAG_ZOOMING:
         break;
     }
 }
@@ -460,6 +488,7 @@ bool WX_VIEW_CONTROLS::handleAutoPanning( const wxMouseEvent& aEvent )
         break;
 
     case DRAG_PANNING:
+    case DRAG_ZOOMING:
         return false;
     }
 

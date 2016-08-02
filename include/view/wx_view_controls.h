@@ -111,6 +111,7 @@ private:
     {
         IDLE = 1,           /// Nothing is happening
         DRAG_PANNING,       /// Panning with mouse button pressed
+        DRAG_ZOOMING,       /// Zooming with wheel button + ctrl
         AUTO_PANNING,       /// Panning on approaching borders of the frame
     };
 
@@ -132,6 +133,9 @@ private:
 
     /// Stores information about point where dragging has started
     VECTOR2D    m_dragStartPoint;
+
+    /// Zoom scale at the moment drag zoom started
+    double m_dragZoomStartScale;
 
     /// Stores information about the center of viewport when dragging has started
     VECTOR2D    m_lookStartPoint;
