@@ -26,12 +26,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+#include <cmath>
+
 #include <wx/wx.h>
 
 #include <view/view.h>
 #include <view/wx_view_controls.h>
 #include <gal/graphics_abstraction_layer.h>
 #include <tool/tool_dispatcher.h>
+
+/// Increasing this value makes drag zoom faster
+#define DRAG_ZOOM_FACTOR (10.)
 
 using namespace KIGFX;
 
@@ -91,13 +96,12 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
             }
             else
             {
-                double zoomScale = 1. + d.y / 10.;
+                double zoomScale = pow( 2., d.y / DRAG_ZOOM_FACTOR );
 
                 m_view->SetScale( m_dragZoomStartScale * zoomScale );
 
                 wxLogDebug("d.y: %f, zoomScale: %f", d.y, zoomScale);
             }
-
 
             aEvent.StopPropagation();
         }
