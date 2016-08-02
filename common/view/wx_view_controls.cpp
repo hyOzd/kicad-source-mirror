@@ -35,7 +35,7 @@
 #include <gal/graphics_abstraction_layer.h>
 #include <tool/tool_dispatcher.h>
 
-/// Increasing this value makes drag zoom faster
+/// Decreasing this value makes drag zoom faster
 #define DRAG_ZOOM_FACTOR (10.)
 
 using namespace KIGFX;
