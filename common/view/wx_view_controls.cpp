@@ -87,20 +87,21 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
     {
         if( m_state == DRAG_PANNING || m_state == DRAG_ZOOMING )
         {
-            VECTOR2D   d = m_dragStartPoint - VECTOR2D( aEvent.GetX(), aEvent.GetY() );
-            VECTOR2D   delta = m_view->ToWorld( d, false );
-
             if ( m_state == DRAG_PANNING )
             {
+                VECTOR2D   d = m_dragStartPoint - VECTOR2D( aEvent.GetX(), aEvent.GetY() );
+                VECTOR2D   delta = m_view->ToWorld( d, false );
+
                 m_view->SetCenter( m_lookStartPoint + delta );
             }
             else
             {
-                double zoomScale = pow( 2., d.y / DRAG_ZOOM_FACTOR );
+                const VECTOR2I& screenSize = m_view->GetGAL()->GetScreenPixelSize();
+                VECTOR2I screenCenter( screenSize / 2 );
+                double delta_y = screenCenter.y - aEvent.GetY();
+                double zoomScale = pow( 2., delta_y / DRAG_ZOOM_FACTOR );
 
                 m_view->SetScale( m_dragZoomStartScale * zoomScale );
-
-                wxLogDebug("d.y: %f, zoomScale: %f", d.y, zoomScale);
             }
 
             aEvent.StopPropagation();
@@ -217,16 +218,16 @@ void WX_VIEW_CONTROLS::onButton( wxMouseEvent& aEvent )
     case AUTO_PANNING:
         if( aEvent.MiddleDown() )
         {
-            m_dragStartPoint = VECTOR2D( aEvent.GetX(), aEvent.GetY() );
-            m_lookStartPoint = m_view->GetCenter();
-
             if ( aEvent.ControlDown() )
             {
                 m_state = DRAG_ZOOMING;
+                CenterOnCursor();
                 m_dragZoomStartScale = m_view->GetScale();
             }
             else
             {
+                m_dragStartPoint = VECTOR2D( aEvent.GetX(), aEvent.GetY() );
+                m_lookStartPoint = m_view->GetCenter();
                 m_state = DRAG_PANNING;
             }
         }
