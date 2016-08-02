@@ -85,6 +85,21 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
 
     if( !isAutoPanning && aEvent.Dragging() )
     {
+        // switch between panning and zooming depending on 'Control' key
+        if ( m_state == DRAG_PANNING && aEvent.ControlDown() )
+        {
+            m_state = DRAG_ZOOMING;
+            m_dragZoomStartScale = m_view->GetScale();
+            m_dragStartPoint = VECTOR2D( aEvent.GetX(), aEvent.GetY() );
+        }
+        else if ( m_state == DRAG_ZOOMING && !aEvent.ControlDown() )
+        {
+            m_state = DRAG_PANNING;
+            m_dragStartPoint = VECTOR2D( aEvent.GetX(), aEvent.GetY() );
+            m_lookStartPoint = m_view->GetCenter();
+        }
+
+        // handle panning and zooming
         if( m_state == DRAG_PANNING || m_state == DRAG_ZOOMING )
         {
             VECTOR2D   d = m_dragStartPoint - VECTOR2D( aEvent.GetX(), aEvent.GetY() );
