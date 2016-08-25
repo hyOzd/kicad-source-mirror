@@ -86,6 +86,27 @@ void WX_VIEW_CONTROLS::onMotion( wxMouseEvent& aEvent )
             VECTOR2D   delta = m_view->ToWorld( d, false );
 
             m_view->SetCenter( m_lookStartPoint + delta );
+
+            int x = aEvent.GetX();
+            int y = aEvent.GetY();
+
+            wxSize parentSize = m_parentPanel->GetClientSize();
+
+            // wrap the pointer
+            VECTOR2I wrapPos(x % parentSize.GetWidth(), y % parentSize.GetHeight());
+            if (wrapPos.x < 0) wrapPos.x += parentSize.GetWidth();
+            if (wrapPos.y < 0) wrapPos.y += parentSize.GetHeight();
+
+            VECTOR2I mousePos(x, y);
+            if (wrapPos != mousePos)
+            {
+                m_parentPanel->WarpPointer( wrapPos.x, wrapPos.y );
+
+                VECTOR2I wrapOffset = wrapPos - mousePos;
+                m_dragStartPoint += wrapOffset;
+                m_lookStartPoint += wrapOffset;
+            }
+
             aEvent.StopPropagation();
         }
     }
